@@ -20,7 +20,7 @@ extension Domain {
         guard let eitherType = type as? EitherCheckable.Type else {
             return false
         }
-        return eitherType.responseType is Empty.Type
+        return eitherType.responseType is EmptyResponseDecodable.Type
     }
 }
 
@@ -28,8 +28,9 @@ public extension Domain.Either {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
-        if Response.self is Domain.Empty.Type {
-            if let errorValue = try? container.decode(ErrorResponse.self) {
+        if Response.self is EmptyResponseDecodable.Type {
+            if let errorValue = try? container.decode(ErrorResponse.self),
+               !errorValue.isEmptyErrorResponse {
                 self = .errorResponse(errorValue)
                 return
             }
@@ -43,5 +44,19 @@ public extension Domain.Either {
         }
         let errorValue = try container.decode(ErrorResponse.self)
         self = .errorResponse(errorValue)
+    }
+}
+
+public protocol EmptyErrorCheckable {
+    var isEmptyErrorResponse: Bool { get }
+}
+
+extension EmptyErrorCheckable {
+    public var isEmptyErrorResponse: Bool { false }
+}
+
+extension Decodable {
+    var isEmptyErrorResponse: Bool {
+        (self as? EmptyErrorCheckable)?.isEmptyErrorResponse ?? false
     }
 }

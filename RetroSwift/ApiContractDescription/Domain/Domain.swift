@@ -37,7 +37,7 @@ open class Domain {
         let responseData = try operationResult.response.get()
 
         if responseData.isEmpty {
-            if Response.self is Empty.Type || Domain.isEitherWithEmptyResponse(Response.self) {
+            if Response.self is EmptyResponseDecodable.Type || Domain.isEitherWithEmptyResponse(Response.self) {
                 return try JSONDecoder().decode(Response.self, from: Domain.emptyJsonData)
             }
         }
@@ -47,10 +47,5 @@ open class Domain {
 }
 
 private extension Domain {
-    static let emptyJsonData: Data = {
-        guard let data = "{}".data(using: .utf8) else {
-            return Data()
-        }
-        return data
-    }()
+    static let emptyJsonData = Data("{}".utf8)
 }
