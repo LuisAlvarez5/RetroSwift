@@ -42,7 +42,52 @@ open class Domain {
             }
         }
 
-        return try JSONDecoder().decode(Response.self, from: responseData)
+        do {
+            return try JSONDecoder().decode(Response.self, from: responseData)
+        } catch let decodingError as DecodingError {
+            let errorDescription = Domain.describeDecodingError(decodingError, data: responseData)
+            print("[RetroSwift] Decoding error: \(errorDescription)")
+            throw decodingError
+        }
+    }
+}
+
+private extension Domain {
+    static func describeDecodingError(_ error: DecodingError, data: Data) -> String {
+        let jsonPreview = String(data: data.prefix(500), encoding: .utf8) ?? "Unable to preview"
+        
+        switch error {
+        case .keyNotFound(let key, let context):
+            return """
+            Key '\(key.stringValue)' not found.
+            Path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))
+            Debug: \(context.debugDescription)
+            JSON preview: \(jsonPreview)
+            """
+        case .typeMismatch(let type, let context):
+            return """
+            Type mismatch for type '\(type)'.
+            Path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))
+            Debug: \(context.debugDescription)
+            JSON preview: \(jsonPreview)
+            """
+        case .valueNotFound(let type, let context):
+            return """
+            Value of type '\(type)' not found.
+            Path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))
+            Debug: \(context.debugDescription)
+            JSON preview: \(jsonPreview)
+            """
+        case .dataCorrupted(let context):
+            return """
+            Data corrupted.
+            Path: \(context.codingPath.map { $0.stringValue }.joined(separator: " -> "))
+            Debug: \(context.debugDescription)
+            JSON preview: \(jsonPreview)
+            """
+        @unknown default:
+            return "Unknown decoding error: \(error.localizedDescription)"
+        }
     }
 }
 
