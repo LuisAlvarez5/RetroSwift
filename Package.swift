@@ -1,14 +1,14 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 
 import PackageDescription
 
 let package = Package(
     name: "RetroSwift",
     platforms: [
-        .macOS("10.15"),
-        .iOS("13.0"),
-        .tvOS("13.0"),
-        .watchOS("6.0")
+        .macOS(.v10_15),
+        .iOS(.v13),
+        .tvOS(.v13),
+        .watchOS(.v6)
     ],
     products: [
         .library(
@@ -21,7 +21,6 @@ let package = Package(
             path: "RetroSwift"),
         .testTarget(
             name: "RetroSwiftTests",
-            // FIXME: Linter to be added
             dependencies: ["RetroSwift"],
             path: "RetroSwiftTests")
     ]
